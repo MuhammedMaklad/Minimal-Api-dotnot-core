@@ -9,7 +9,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders(); 
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
-builder.Logging.SetMinimumLevel(LogLevel.Debug);
+builder.Logging.SetMinimumLevel(LogLevel.Warning);
+
+builder.Logging.AddFilter("Microsoft.EntityFrameworkCore.Model", LogLevel.None);
+builder.Logging.AddFilter("Microsoft.EntityFrameworkCore.Query", LogLevel.None);
 
 
 // *[2] Configuring Configuration
@@ -27,6 +30,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
+
+
+// * Registers the Coupon repository
+builder.Services.AddScoped<ICouponRepository, CouponRepository>();
 
 // * Service for Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -58,7 +65,19 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapGet("/", () => "Hello World from Coupon API!, Muhammed on da code ");
-
+app.MapGet("/test-logging", (ILogger<Program> logger) => 
+{
+    logger.LogTrace("Trace message");
+    logger.LogDebug("Debug message");
+    logger.LogInformation("Info message");
+    logger.LogWarning("Warning message");
+    logger.LogError("Error message");
+    logger.LogCritical("Critical message");
+    
+    return "Check your logs";
+});
+// Map the coupon endpoints
+app.MapCouponEndpoints();
 app.Run();
 
 
