@@ -5,7 +5,7 @@ namespace MinimalApi;
 public class BaseResponse
 {
   [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-  public bool Success { get; set; }
+  public bool? Success { get; set; }
 
   [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
   public string? ErrorCode { get; set; }
@@ -13,4 +13,7 @@ public class BaseResponse
 
   [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
   public string? Error { get; set; }
+
+  [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+  public string? Message { get; set; }
 }

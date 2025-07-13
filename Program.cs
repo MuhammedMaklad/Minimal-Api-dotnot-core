@@ -75,11 +75,11 @@ app.Run();
   - configure Entity Framework Core [done]
   - configure Identity [done]
   TODO:
-  - Setup Global Error Handler
-  - Setup Request & Response 
+  - Setup Global Error Handler [done]
+  - Setup Request & Response [done]
   TODO:
-  - Add a Coupon model 
-  - Add a Coupon endpoint
-  - Add a Coupon repository
-
+  - Add a Coupon model  [done]
+  - Add a Coupon endpoint [done]
+  - Add a Coupon repository [done]
+  
 */

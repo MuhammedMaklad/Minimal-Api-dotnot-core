@@ -13,10 +13,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<ApplicationUser> ApplicationUsers { get; set; }
     public DbSet<LocalUser> LocalUsers { get; set; }
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+  protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
     base.OnModelCreating(modelBuilder);
-    modelBuilder.Entity<Coupon>().ToTable("Coupons");
+    modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
   }
 }
 
