@@ -1,6 +1,8 @@
 
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using MinimalApi;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,6 +37,9 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
 // * Registers the Coupon repository
 builder.Services.AddScoped<ICouponRepository, CouponRepository>();
 
+//* Register AutoMapper Service
+builder.Services.AddAutoMapper(typeof(MappingProfiles));
+
 // * Service for Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApiDocument(config =>
@@ -65,19 +70,24 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapGet("/", () => "Hello World from Coupon API!, Muhammed on da code ");
-app.MapGet("/test-logging", (ILogger<Program> logger) => 
-{
-    logger.LogTrace("Trace message");
-    logger.LogDebug("Debug message");
-    logger.LogInformation("Info message");
-    logger.LogWarning("Warning message");
-    logger.LogError("Error message");
-    logger.LogCritical("Critical message");
-    
-    return "Check your logs";
-});
 // Map the coupon endpoints
 app.MapCouponEndpoints();
+app.UseExceptionHandler(exceptionHandlerApp =>
+{
+    exceptionHandlerApp.Run(async context =>
+    {
+        context.Response.StatusCode = StatusCodes.Status400BadRequest;
+        context.Response.ContentType = "application/json";
+        
+        var error = context.Features.Get<IExceptionHandlerFeature>()?.Error;
+        
+        await context.Response.WriteAsJsonAsync(new 
+        {
+            Error = error?.Message ?? "Bad request",
+            Details = error is BadHttpRequestException ? "Invalid parameter format" : null
+        });
+    });
+});
 app.Run();
 
 
@@ -97,8 +107,10 @@ app.Run();
   - Setup Global Error Handler [done]
   - Setup Request & Response [done]
   TODO:
-  - Add a Coupon model  [done]
-  - Add a Coupon endpoint [done]
-  - Add a Coupon repository [done]
+  - Add Coupon model  [done]
+  - Add Coupon endpoint [done]
+  - Add Coupon repository [done]
+  - Add Coupon Filter [done]
+  - Add Coupon Validation [] 
   
 */

@@ -2,13 +2,10 @@
 
 namespace MinimalApi;
 
-public class BaseResponse
+public class BaseResponse<T> where T : class
 {
   [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
   public bool? Success { get; set; }
-
-  [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-  public string? ErrorCode { get; set; }
 
 
   [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -16,4 +13,10 @@ public class BaseResponse
 
   [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
   public string? Message { get; set; }
+
+  [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+  public T? Data { get; set; }
+  
+  [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+  public ICollection<T>? ArrayData { get; set; }
 }
