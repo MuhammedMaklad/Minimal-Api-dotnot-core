@@ -14,7 +14,7 @@ public class BasicValidator<T> : IEndpointFilter where T : class
   }
   public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
   {
-    var response = new BaseResponse()
+    var response = new BaseResponse<CouponDto>()
     {
       Success = false,
     };

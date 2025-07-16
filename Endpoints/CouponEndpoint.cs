@@ -11,9 +11,9 @@ public static class CouponEndpoint
     // Define your coupon-related endpoints here
 
     var group = app.MapGroup("/api/v1/coupons")
-        .WithTags("Coupons")
-        .WithSummary("Coupon Management API")
-        .WithDescription("Endpoints for managing coupons in the application");
+      .WithTags("Coupons")
+      .WithSummary("Coupon Management API")
+      .WithDescription("Endpoints for managing coupons in the application");
 
 
     group.MapGet("/", GetAllCoupons)
@@ -36,11 +36,53 @@ public static class CouponEndpoint
 
 
     group.MapPost("/", CreateCoupon)
-    .WithName("CreateCoupon");
+    .WithName("CreateCoupon")
+    .AddEndpointFilter<BasicValidator<CreateCouponRequest>>();
+
+    group.MapPatch("/{id:int}", UpdateCoupon)
+    .WithName("UpdateCoupon")
+    .AddEndpointFilter<BasicValidator<UpdateCouponRequest>>();
   
   }
 
+  private static async Task<IResult> DeleteCoupon([FromRoute] int id, ICouponRepository couponRepo, ILogger<Program> logger)
+  {
+    logger.LogInformation("Delete Coupon Handler");
+    try
+    {
+      var coupon = await couponRepo.GetAsync(id);
+      if (coupon is null)
+        return TypedResults.NotFound("Invalid Id");
 
+      await couponRepo.DeleteAsync(coupon);
+      return TypedResults.Ok("Coupon Delete Successfully");
+    }
+    catch (Exception ex)
+    {
+      logger.LogError(ex.Message);
+      return TypedResults.Problem(detail: "Error while delete Coupon", statusCode: StatusCodes.Status500InternalServerError);
+    }
+  }
+  private static async Task<IResult> UpdateCoupon([FromRoute] int id, UpdateCouponRequest request, ICouponRepository couponRepo, IMapper mapper, ILogger<Program> logger)
+  {
+    logger.LogInformation("Update Coupon Handler");
+    try
+    {
+      if (couponRepo.GetAsync(id).GetAwaiter().GetResult() is null)
+      {
+        return TypedResults.NotFound("Invalid id");
+      }
+      var coupon = mapper.Map<Coupon>(request);
+      await couponRepo.UpdateAsync(coupon);
+
+      return TypedResults.Ok("Coupon Update Successfully");
+    }
+    catch (Exception ex)
+    {
+      logger.LogError(ex.Message);
+      return TypedResults.Problem(detail: "Error while update coupon", statusCode: StatusCodes.Status500InternalServerError);
+    }
+  }
   private static async Task<IResult> CreateCoupon([FromBody] CreateCouponRequest request, ICouponRepository couponRepo, IMapper mapper, ILogger<Program> logger)
   {
     logger.LogInformation("Create Coupon Handlers.......");

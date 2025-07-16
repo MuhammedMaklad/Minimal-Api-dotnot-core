@@ -1,4 +1,5 @@
 
+using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -39,6 +40,11 @@ builder.Services.AddScoped<ICouponRepository, CouponRepository>();
 
 //* Register AutoMapper Service
 builder.Services.AddAutoMapper(typeof(MappingProfiles));
+
+// * Register Validators
+builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
+builder.Services.AddScoped(typeof(BasicValidator<>));
+
 
 // * Service for Swagger
 builder.Services.AddEndpointsApiExplorer();

@@ -18,7 +18,7 @@ public class CouponConfiguration : IEntityTypeConfiguration<Coupon>
 
     builder.Property(c => c.Percent)
       .IsRequired()
-      .HasColumnType("decimal(2,2)");
+      .HasColumnType("decimal(5,2)");
 
     builder.Property(c => c.IsActive)
       .HasColumnType("bit")
