@@ -42,6 +42,9 @@ public static class CouponEndpoint
     group.MapPatch("/{id:int}", UpdateCoupon)
     .WithName("UpdateCoupon")
     .AddEndpointFilter<BasicValidator<UpdateCouponRequest>>();
+
+    group.MapDelete("/{id:int}", DeleteCoupon)
+    .WithName("DeleteCoupon");
   
   }
 

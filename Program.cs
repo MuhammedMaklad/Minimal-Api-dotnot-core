@@ -75,32 +75,18 @@ if (app.Environment.IsDevelopment())
   );
 }
 
+app.UseMiddleware<RequestLoggingMiddleware>();
 app.MapGet("/", () => "Hello World from Coupon API!, Muhammed on da code ");
 // Map the coupon endpoints
 app.MapCouponEndpoints();
-app.UseExceptionHandler(exceptionHandlerApp =>
-{
-    exceptionHandlerApp.Run(async context =>
-    {
-        context.Response.StatusCode = StatusCodes.Status400BadRequest;
-        context.Response.ContentType = "application/json";
-        
-        var error = context.Features.Get<IExceptionHandlerFeature>()?.Error;
-        
-        await context.Response.WriteAsJsonAsync(new 
-        {
-            Error = error?.Message ?? "Bad request",
-            Details = error is BadHttpRequestException ? "Invalid parameter format" : null
-        });
-    });
-});
-app.Run();
+
+app.Run($"Server Running in Port");
 
 
 /*
   TODO:
-  - run dotnet watch run
-  - test the API with Swagger UI
+  - run dotnet watch run [done]
+  - test the API with Swagger UI [done]
   TODO:
   - Enable Logger [done]
   - Add Configuration [done]
@@ -114,9 +100,11 @@ app.Run();
   - Setup Request & Response [done]
   TODO:
   - Add Coupon model  [done]
-  - Add Coupon endpoint [done]
+  - Add Coupon endpoints [done]
   - Add Coupon repository [done]
   - Add Coupon Filter [done]
-  - Add Coupon Validation [] 
-  
+  - Add Coupon Validation [done] 
+  TODO:
+  - Add Auth model [done]
+  - Add Auth repository [done]
 */
