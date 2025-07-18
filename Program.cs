@@ -1,9 +1,12 @@
 
+using System.Text;
 using FluentValidation;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using MinimalApi;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -47,6 +50,32 @@ builder.Services.AddAutoMapper(typeof(MappingProfiles));
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 builder.Services.AddScoped(typeof(BasicValidator<>));
 
+// * Add Authentication Service
+builder.Services.AddAuthentication(options =>
+{
+  options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme; //Sets JWT as the default scheme for authentication
+  options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme; // Sets JWT as the default scheme for challenges 
+}).AddJwtBearer(options =>
+{
+  options.RequireHttpsMetadata = false; // Disabled for development (set to true in production)
+  options.SaveToken = true; //  Saves the token in the AuthenticationProperties
+  options.TokenValidationParameters = new TokenValidationParameters
+  {
+    ValidateIssuerSigningKey = true,
+    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(
+      builder.Configuration.GetValue<string>("ApiSettings:Secret")!)),
+    ValidateIssuer = false,
+    ValidateAudience = false
+  };
+});
+
+// * Add Authorization Service
+builder.Services.AddAuthorization(
+  options =>
+  {
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+  }
+);
 
 // * Service for Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -76,6 +105,9 @@ if (app.Environment.IsDevelopment())
   }
   );
 }
+// ! AA Middleware 
+app.UseAuthentication();
+app.UseAuthorization();
 
 // ! Custom Middleware
 app.UseMiddleware<RequestLoggingMiddleware>();
@@ -86,8 +118,9 @@ app.MapGet("/", () => "Hello World from Coupon API!, Muhammed on da code ");
 
 //! Map Endpoints
 app.MapCouponEndpoints();
+app.MapAuthEndpoints();
 
-app.Run($"Server Running in Port");
+app.Run();
 
 
 /*
@@ -98,8 +131,8 @@ app.Run($"Server Running in Port");
   - Enable Logger [done]
   - Add Configuration [done]
   TODO: 
-  - Add Logging Middleware
-  - Add Exception Handler Middleware
+  - Add Logging Middleware [done]
+  - Add Exception Handler Middleware [done]
   TODO:
   - Create a database [done]
   - Add a database connection [done]
@@ -118,4 +151,8 @@ app.Run($"Server Running in Port");
   - Add Auth model [done]
   - Add Auth repository [done]
   - Add Auth Endpoint [done]
+  - Add Auth Filter [done]
+  - Add Auth Validation [done]
+  TODO:
+  - Add Authentication
 */

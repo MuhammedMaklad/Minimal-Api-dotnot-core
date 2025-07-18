@@ -17,9 +17,19 @@ public class ExceptionMiddleware
     {
       await next(context);
     }
+    catch (AuthException ex)
+    {
+      logger.LogError(ex.Message, "Auth Error Occurred");
+      context.Response.StatusCode = ex.StatusCode;
+      await context.Response.WriteAsJsonAsync(new
+      {
+        Success = false,
+        Message = ex.Message
+      });
+    }
     catch (Exception ex)
     {
-      logger.LogError(ex.Message);
+      logger.LogError(ex, $"Inter Server error while process request {context.Request.Path}");
       context.Response.StatusCode = StatusCodes.Status500InternalServerError;
       await context.Response.WriteAsJsonAsync(new
       {

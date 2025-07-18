@@ -11,19 +11,28 @@ public static class AuthEndpoint
 
     group.MapPost("/register", Register)
     .AddEndpointFilter<BasicValidator<RegisterUserRequest>>();
+    group.MapPost("/login", Login)
+    .AddEndpointFilter<BasicValidator<LoginUserRequest>>();
+
+    group.MapGet("/fetchUser", async (IAuthRepository repo) =>
+    {
+      return TypedResults.Ok(new
+      {
+        users = await repo.getUsers()
+      });
+    }).RequireAuthorization("Admin");
   }
 
   private static async Task<IResult> Register([FromBody] RegisterUserRequest request, IAuthRepository authRepository, ILogger<Program> logger)
   {
-    if (!await authRepository.IsUniqueUser(request.Email))
-      return TypedResults.BadRequest(BaseResponse<UserDto>.Failure("Error", "User Already Use"));
-      
-    if (await authRepository.RegisterUser(request))
-      return TypedResults.Created("User Register Successfully, Please Login in", BaseResponse<UserDto>.OK(message: "Complete"));
+    await authRepository.RegisterUser(request);
 
-    return TypedResults.Problem(
-      detail: "Error While Register Process, Please Try Again Letter.",
-      statusCode: StatusCodes.Status500InternalServerError
-    );
+    return TypedResults.Created("User Register Successfully, Please Login in", BaseResponse<UserDto>.OK(message: "Complete"));
+  }
+
+  private static async Task<IResult> Login([FromBody] LoginUserRequest request, IAuthRepository authRepository, ILogger<Program> logger)
+  {
+    var response = await authRepository.LoginUser(request);
+    return TypedResults.Ok(response);
   }
 }

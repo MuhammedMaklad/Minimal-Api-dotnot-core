@@ -37,14 +37,17 @@ public static class CouponEndpoint
 
     group.MapPost("/", CreateCoupon)
     .WithName("CreateCoupon")
-    .AddEndpointFilter<BasicValidator<CreateCouponRequest>>();
+    .AddEndpointFilter<BasicValidator<CreateCouponRequest>>()
+    .RequireAuthorization("Admin");
 
     group.MapPatch("/{id:int}", UpdateCoupon)
     .WithName("UpdateCoupon")
-    .AddEndpointFilter<BasicValidator<UpdateCouponRequest>>();
+    .AddEndpointFilter<BasicValidator<UpdateCouponRequest>>()
+    .RequireAuthorization("Admin");
 
     group.MapDelete("/{id:int}", DeleteCoupon)
-    .WithName("DeleteCoupon");
+    .WithName("DeleteCoupon").
+    RequireAuthorization("Admin");
   
   }
 
