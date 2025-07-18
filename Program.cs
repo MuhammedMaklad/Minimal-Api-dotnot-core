@@ -38,6 +38,8 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
 // * Registers the Coupon repository
 builder.Services.AddScoped<ICouponRepository, CouponRepository>();
 
+// * Register Auth Service
+builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 //* Register AutoMapper Service
 builder.Services.AddAutoMapper(typeof(MappingProfiles));
 
@@ -75,9 +77,14 @@ if (app.Environment.IsDevelopment())
   );
 }
 
+// ! Custom Middleware
 app.UseMiddleware<RequestLoggingMiddleware>();
+app.UseMiddleware<ExceptionMiddleware>();
+
 app.MapGet("/", () => "Hello World from Coupon API!, Muhammed on da code ");
-// Map the coupon endpoints
+
+
+//! Map Endpoints
 app.MapCouponEndpoints();
 
 app.Run($"Server Running in Port");
@@ -90,6 +97,9 @@ app.Run($"Server Running in Port");
   TODO:
   - Enable Logger [done]
   - Add Configuration [done]
+  TODO: 
+  - Add Logging Middleware
+  - Add Exception Handler Middleware
   TODO:
   - Create a database [done]
   - Add a database connection [done]
@@ -107,4 +117,5 @@ app.Run($"Server Running in Port");
   TODO:
   - Add Auth model [done]
   - Add Auth repository [done]
+  - Add Auth Endpoint [done]
 */

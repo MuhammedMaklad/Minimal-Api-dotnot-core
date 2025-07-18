@@ -24,7 +24,7 @@ public class AuthRepository : IAuthRepository
     _mapper = mapper;
     _roleManager = roleManager;
     _configuration = configuration;
-    secretKey = configuration.GetValue<string>("ApiSettings:Secret") ?? throw new Exception("Secret key is null");
+    secretKey = _configuration.GetValue<string>("ApiSettings:Secret") ?? throw new Exception("Secret key is null");
   }
   public async Task<bool> IsUniqueUser(string email)
   {

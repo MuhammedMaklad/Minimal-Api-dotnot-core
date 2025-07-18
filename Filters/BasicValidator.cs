@@ -13,28 +13,31 @@ public class BasicValidator<T> : IEndpointFilter where T : class
     _logger = logger;
   }
   public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
-  {
-    var response = new BaseResponse<CouponDto>()
     {
-      Success = false,
-    };
+        var requestObject = context.Arguments.SingleOrDefault(x => x?.GetType() == typeof(T));
 
-    var contextObj = context.Arguments.SingleOrDefault(x => x?.GetType() == typeof(T));
+        if (requestObject is null)
+        {
+            _logger.LogWarning("No object of type {Type} found in request context", typeof(T).Name);
+            return Results.BadRequest(BaseResponse<T>.Failure("Invalid request format"));
+        }
 
-    if (contextObj is null)
-      return Results.BadRequest(new
-      {
-        IsSuccess = false,
-        StatusCode = HttpStatusCode.BadRequest
-      });
+        var validationResult = await _validator.ValidateAsync((T)requestObject);
 
-    var result = await _validator.ValidateAsync((T)(contextObj));
+        if (!validationResult.IsValid)
+        {
+            var errorMessages = validationResult.Errors.Select(e => e.ErrorMessage).ToArray();
+            
+            _logger.LogInformation("Validation failed for {Type}: {Errors}", 
+                typeof(T).Name, 
+                string.Join(", ", errorMessages));
 
-    if (!result.IsValid)
-    {
-      response.Message = result.Errors?.FirstOrDefault()?.ToString() ?? "Validation Failed";
-      return Results.BadRequest(response);
+            return Results.BadRequest(BaseResponse<T>.Failure(
+                "Validation failed", 
+                errorMessages
+            ));
+        }
+
+        return await next(context);
     }
-    return await next(context);
-  }
 }
